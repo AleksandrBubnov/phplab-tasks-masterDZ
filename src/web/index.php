@@ -3,9 +3,35 @@ require_once './functions.php';
 
 $airports = require './airports.php';
 
-if (isset($_GET['filter_by_first_letter'])) {
-    echo 'Filter ' . $_GET['filter_by_first_letter'];
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    $page = 1;
+    $url_filter_by_state = '';
+    $url_sort = '';
+    $url_filter_by_first_letter = '';
+
+    foreach ($_GET as $key => $value) {
+        if ($key != 'page') {
+            $airports = snakeCaseToCamelCase2('get_' . $key)($airports, $value); //(название функции)(параметры функции)
+            $url = 'url_' . $key;
+            $$url = "&$key=$value";
+        } else {
+            $page = $_GET['page'];
+        }
+    }
+
+    if ($page < 10) {
+        $start_page = 1;
+        // $end_page = 10;
+        $end_page = (ceil(count($airports) / 5) > $page + 5) ? $page + 5 : ceil(count($airports) / 5);
+    } else {
+        $start_page = $page - 5;
+        // $end_page = $page + 5;
+        $end_page = (ceil(count($airports) / 5) > $page + 5) ? $page + 5 : ceil(count($airports) / 5);
+    }
+
+    $airports = array_chunk($airports, 5, true);
 }
+
 // Filtering
 /**
  * Here you need to check $_GET request if it has any filtering
@@ -58,10 +84,10 @@ if (isset($_GET['filter_by_first_letter'])) {
             Filter by first letter:
 
             <?php foreach (getUniqueFirstLetters(require './airports.php') as $letter) : ?>
-                <a href="index.php?filter_by_first_letterd=<?= $letter ?>"><?= $letter ?></a>
+                <a href="./?filter_by_first_letter=<?= $letter . $url_filter_by_state . $url_sort ?>"><?= $letter ?></a>
             <?php endforeach; ?>
 
-            <a href="/" class="float-right">Reset all filters</a>
+            <a href="./" class="float-right">Reset all filters</a>
         </div>
 
         <!--
@@ -77,10 +103,10 @@ if (isset($_GET['filter_by_first_letter'])) {
         <table class="table">
             <thead>
                 <tr>
-                    <th scope="col"><a href="#">Name</a></th>
-                    <th scope="col"><a href="#">Code</a></th>
-                    <th scope="col"><a href="#">State</a></th>
-                    <th scope="col"><a href="#">City</a></th>
+                    <th scope="col"><a href="./?sort=name&page=<?= $page . $url_filter_by_state . $url_filter_by_first_letter ?>">Name</a></th>
+                    <th scope="col"><a href="./?sort=code&page=<?= $page . $url_filter_by_state . $url_filter_by_first_letter ?>">Code</a></th>
+                    <th scope="col"><a href="./?sort=state&page=<?= $page . $url_filter_by_state . $url_filter_by_first_letter ?>">State</a></th>
+                    <th scope="col"><a href="./?sort=city&page=<?= $page . $url_filter_by_state . $url_filter_by_first_letter ?>">City</a></th>
                     <th scope="col">Address</th>
                     <th scope="col">Timezone</th>
                 </tr>
@@ -96,16 +122,19 @@ if (isset($_GET['filter_by_first_letter'])) {
              - when you apply filter_by_state, than filter_by_first_letter (see Filtering task #1) is not reset
                i.e. if you have filter_by_first_letter set you can additionally use filter_by_state
         -->
-                <?php foreach ($airports as $airport) : ?>
-                    <tr>
-                        <td><?= $airport['name'] ?></td>
-                        <td><?= $airport['code'] ?></td>
-                        <td><a href="#"><?= $airport['state'] ?></a></td>
-                        <td><?= $airport['city'] ?></td>
-                        <td><?= $airport['address'] ?></td>
-                        <td><?= $airport['timezone'] ?></td>
-                    </tr>
-                <?php endforeach; ?>
+                <?php
+                if ($airports) {
+                    foreach ($airports[$page - 1] as $airport) { ?>
+                        <tr>
+                            <td><?= $airport['name'] ?></td>
+                            <td><?= $airport['code'] ?></td>
+                            <td><a href="./?filter_by_state=<?= $airport['state'] . $url_filter_by_first_letter ?>"><?= $airport['state'] ?></a></td>
+                            <td><?= $airport['city'] ?></td>
+                            <td><?= $airport['address'] ?></td>
+                            <td><?= $airport['timezone'] ?></td>
+                        </tr>
+                <?php }
+                } ?>
             </tbody>
         </table>
 
@@ -121,12 +150,11 @@ if (isset($_GET['filter_by_first_letter'])) {
         <nav aria-label="Navigation">
             <ul class="pagination justify-content-center">
                 <?php
-                $page = 3;
-                for ($i = 0; $i < 10; $i++) {
-                    if (($i + 1) == $page) {
-                        echo '<li class="page-item active"><a class="page-link" href="#">' . ($i + 1) . '</a></li>';
+                for ($i = $start_page; $i <= $end_page; $i++) {
+                    if (($i) == $page) {
+                        echo '<li class="page-item active"><a class="page-link" href="./?page=' . $i . $url_filter_by_first_letter . $url_filter_by_state . $url_sort . '">' . $i . '</a></li>';
                     } else {
-                        echo '<li class="page-item"><a class="page-link" href="#">' . ($i + 1) . '</a></li>';
+                        echo '<li class="page-item"><a class="page-link" href="./?page=' . $i . $url_filter_by_first_letter . $url_filter_by_state . $url_sort . '">' . $i . '</a></li>';
                     }
                 }
                 ?>
