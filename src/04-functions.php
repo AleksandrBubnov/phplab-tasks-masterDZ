@@ -1,4 +1,7 @@
 <?php
+
+// https://phpunit.readthedocs.io/ru/latest/index.html
+
 /**
  * Create a PhpUnit test (SayHelloTest) which will check that function below returns a correct result
  * i.e. returns 'Hello'
@@ -36,6 +39,12 @@ function sayHelloArgument($arg)
 function sayHelloArgumentWrapper($arg)
 {
     // put your code here
+    if (
+        !is_int($arg) &&
+        !is_float($arg) &&
+        !is_string($arg) &&
+        !is_bool($arg)
+    ) throw new InvalidArgumentException('InvalidArgumentException');
 
     return sayHelloArgument($arg);
 }
@@ -70,4 +79,11 @@ function countArguments()
 function countArgumentsWrapper()
 {
     // put your code here
+    $arg_list = func_get_args();
+    $numargs = func_num_args();
+    for ($i = 0; $i < $numargs; $i++) {
+        if (!is_string($arg_list[$i])) throw new InvalidArgumentException('InvalidArgumentException');
+    }
+
+    return countArguments(...$arg_list);
 }

@@ -21,8 +21,8 @@ class GetUniqueFirstLettersTest extends TestCase
                     ["name" => "Austin Bergstrom International Airport"],
                     ["name" => "Boise Airport"],
                     ["name" => "Hollywood Burbank Airport"],
-                ],
-                ['A', 'B', 'H']
+                ], // послали
+                ['A', 'B', 'H'] // получили
             ],
         ];
     }
