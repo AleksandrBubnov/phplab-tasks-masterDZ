@@ -1,11 +1,21 @@
 <?php
+require_once '../../vendor/autoload.php';
+
 use src\oop\Calculator;
 use src\oop\Commands\SubCommand;
 use src\oop\Commands\SumCommand;
 
+use src\oop\Commands\MultCommand;
+use src\oop\Commands\DivCommand;
+use src\oop\Commands\PowerCommand;
+
 $calc = new Calculator();
 $calc->addCommand('+', new SumCommand());
 $calc->addCommand('-', new SubCommand());
+
+$calc->addCommand('*', new MultCommand());
+$calc->addCommand('/', new DivCommand());
+$calc->addCommand('^', new PowerCommand());
 
 // You can use any operation for computing
 // will output 2
@@ -43,4 +53,26 @@ echo $calc->init(1)
     ->undo()
     ->getResult();
 
+echo PHP_EOL;
+
+// will output 150
+echo $calc->init(15)
+    ->compute('*', 10)
+    ->getResult();
+
+echo PHP_EOL;
+
+// will output 2
+echo $calc->init(4)
+    ->compute('/', 2)
+    ->getResult();
+
+echo PHP_EOL;
+
+// will output 16
+echo $calc->init(4)
+    ->compute('^', 2)
+    ->getResult();
+
+echo PHP_EOL;
 echo PHP_EOL;
